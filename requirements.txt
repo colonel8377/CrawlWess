@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic-settings
+requests
+feedparser
+openai
+apscheduler
+beautifulsoup4
+markdownify
+pytz
+python-dateutil
