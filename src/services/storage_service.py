@@ -23,6 +23,37 @@ class StorageService:
     def _sanitize_filename(self, name: str) -> str:
         return re.sub(r'[\\/*?:"<>|]', "", name).strip().replace(" ", "_")
 
+    def get_file_path(self, subscription_name: str, date_str: str, title: str, is_summary: bool = False, extension: str = "md") -> str:
+        """
+        Construct the file path for retrieval.
+        """
+        safe_sub_name = self._sanitize_filename(subscription_name)
+        safe_title = self._sanitize_filename(title)
+        folder_path = os.path.join(self.base_dir, safe_sub_name, date_str)
+        filename = f"{safe_title}_summary.{extension}" if is_summary else f"{safe_title}.{extension}"
+        return os.path.join(folder_path, filename)
+
+    def file_exists(self, subscription_name: str, date_str: str, title: str, is_summary: bool = False, extension: str = "md") -> bool:
+        """
+        Check if file exists.
+        """
+        path = self.get_file_path(subscription_name, date_str, title, is_summary, extension)
+        return os.path.exists(path)
+
+    def read_file(self, file_path: str) -> str | None:
+        """
+        Read content from file.
+        """
+        if not os.path.exists(file_path):
+            logger.warning(f"File not found: {file_path}")
+            return None
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception as e:
+            logger.error(f"Failed to read file {file_path}: {e}")
+            return None
+
     def save_md(self, subscription_name: str, date_str: str, title: str, content: str):
         """
         Alias for save_markdown(..., is_summary=False)

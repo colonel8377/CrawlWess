@@ -79,13 +79,24 @@ app = FastAPI(title="CrawlWess RSS Agent", lifespan=lifespan)
 def read_root():
     return {"status": "running", "timezone": "Asia/Shanghai"}
 
+from pydantic import BaseModel
+
 # --- Debug Endpoints ---
 
+class FetchRequest(BaseModel):
+    url: str | None = None
+
 @app.post("/debug/fetch", dependencies=[Depends(verify_admin)])
-async def debug_fetch():
-    """Trigger RSS fetch immediately (Authenticated)"""
-    scheduler.add_job(job_fetch_rss)
-    return {"message": "RSS fetch job triggered"}
+async def debug_fetch(request: FetchRequest = None):
+    """Trigger RSS fetch immediately (Authenticated). Optional: provide specific 'url'."""
+    if request and request.url:
+        logger.info(f"Triggering manual fetch for: {request.url}")
+        scheduler.add_job(rss_service.fetch_and_process_feed, args=[request.url])
+        return {"message": f"RSS fetch job triggered for {request.url}"}
+    else:
+        logger.info("Triggering configured RSS fetch job")
+        scheduler.add_job(job_fetch_rss)
+        return {"message": "RSS fetch job triggered for all configured URLs"}
 
 @app.post("/debug/report", dependencies=[Depends(verify_admin)])
 async def debug_report():
