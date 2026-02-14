@@ -51,9 +51,9 @@ class RssService:
         
         raw_id = entry.get("id", "")
         if not raw_id:
-             raw_id = entry.get("guid", "")
+             raw_id = entry.get("title", "") + entry.get("author", "")  + entry.get("summary", "")
         
-        entry_id = raw_id.strip().replace("`", "").strip()
+        entry_id = raw_id.strip()
         title = entry.get("title", "No Title").strip()
         
         if not link or not entry_id:
@@ -171,7 +171,7 @@ class RssService:
         """
         # Query for pending articles
         # Limit to 10 per batch to avoid timeouts if backlog is huge
-        pending_articles = db.query(Article).filter(Article.is_processed == False).limit(10).all()
+        pending_articles = db.query(Article).filter(Article.is_processed == False).all()
         
         if not pending_articles:
             return
