@@ -6,8 +6,8 @@ import time
 # Configuration
 # ==========================================
 # Get config from env or use defaults
-HOST = os.getenv("API_HOST", "https://crawlwess-production.up.railway.app/")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "huang@123")
+HOST = os.getenv("API_HOST", "")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 USERNAME = "admin" # Username can be anything, only password is verified
 
 # Helpers
