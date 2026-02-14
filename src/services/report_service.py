@@ -37,7 +37,6 @@ class ReportService:
             today_str = datetime.now().strftime("%Y-%m-%d")
             
             message_lines = [
-                f"## 📅 今日精选日报 {today_str}", 
                 "",
                 f"> 💡 **总结**: {daily_insight}",
                 "",

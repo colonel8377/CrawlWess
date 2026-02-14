@@ -16,37 +16,53 @@ class AIService:
             base_url=settings.OPENAI_BASE_URL
         )
 
-    def analyze_article(self, title: str, content: str) -> dict:
+    def analyze_article(self, title: str, content: str, max_retries: int = 3) -> dict:
         """
         Analyze article for score, summary and ad detection.
         Returns dict with keys: score, summary, is_ad
+        Includes retry logic for JSON parsing failures.
         """
         # Truncate content if too long, but keep enough for context
         truncated_content = content[:30000] 
         
         prompt = ANALYZE_ARTICLE_PROMPT.format(title=title, content=truncated_content)
 
-        try:
-            response = self.client.chat.completions.create(
-                model=settings.OPENAI_MODEL,
-                messages=[
-                    {"role": "system", "content": ANALYZE_ARTICLE_SYS_PROMPT},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={ "type": "json_object" }
-            )
-            
-            content = response.choices[0].message.content
-            result = json.loads(content)
-            return result
-            
-        except Exception as e:
-            logger.error(f"Error analyzing article '{title}': {e}")
-            return {
-                "score": 0,
-                "summary": "AI 分析失败",
-                "is_ad": False
-            }
+        for attempt in range(max_retries):
+            content_resp = None
+            try:
+                response = self.client.chat.completions.create(
+                    model=settings.OPENAI_MODEL,
+                    messages=[
+                        {"role": "system", "content": ANALYZE_ARTICLE_SYS_PROMPT},
+                        {"role": "user", "content": prompt}
+                    ],
+                    response_format={ "type": "json_object" }
+                )
+                
+                content_resp = response.choices[0].message.content
+                result = json.loads(content_resp)
+                
+                # Basic validation of result structure
+                if "score" not in result or "summary" not in result:
+                     raise ValueError("Missing required keys in JSON response")
+                     
+                return result
+                
+            except json.JSONDecodeError as e:
+                logger.warning(f"JSON decode error analyzing article '{title}', content resp: {content_resp}, (Attempt {attempt+1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:
+                     logger.error(f"Failed to parse JSON after {max_retries} attempts for '{title}'")
+            except Exception as e:
+                logger.error(f"Error analyzing article '{title}', content resp: {content_resp}, (Attempt {attempt+1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:
+                     break
+        
+        # Fallback if all retries fail
+        return {
+            "score": 0,
+            "summary": "AI 分析失败 (多次重试后)",
+            "is_ad": False
+        }
 
     def generate_daily_insight(self, articles_data: list[dict]) -> str:
         """
