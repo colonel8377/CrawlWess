@@ -8,15 +8,15 @@ class Settings(BaseSettings):
     APP_ENV: str = "production"
     
     # RSS
-    RSS_URLS: str = "" # Comma separated URLs
+    RSS_URLS: str # Required from Env
     
     # AI
-    OPENAI_API_KEY: str # Required
-    OPENAI_BASE_URL: str = "https://api.openai.com/v1"
-    OPENAI_MODEL: str = "gpt-4o-mini"
+    OPENAI_API_KEY: str # Required from Env
+    OPENAI_BASE_URL: str
+    OPENAI_MODEL: str
     
     # Database
-    DB_PATH: str = "data/news.db" # Default to local file
+    DB_PATH: str = "data/news.db"
     
     # Notification
     NOTIFICATION_CHANNELS: str = "dingtalk"
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     TG_CHAT_ID: Optional[str] = None
     
     # Auth
-    ADMIN_PASSWORD: str = "admin123"
+    ADMIN_PASSWORD: str # Required from Env
     
     # Scheduling
     PUSH_TIME: str = "09:00"
