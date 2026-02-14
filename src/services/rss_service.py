@@ -81,6 +81,7 @@ class RssService:
                 if not existing.subscription_name:
                     existing.subscription_name = subscription_name
                     db.commit()
+                logger.info(f"Skipping existing article (DB+File present): {title}")
                 return # All good, skip
             else:
                 logger.warning(f"Article exists in DB but MD file missing: {title}. Re-fetching...")
@@ -116,6 +117,7 @@ class RssService:
                         if not existing_after_race.subscription_name:
                              existing_after_race.subscription_name = subscription_name
                              db.commit()
+                        logger.info(f"Skipping existing article (Race winner handled it): {title}")
                         return # Race winner did the job
                     else:
                         logger.warning(f"Race winner failed to save file for {title}. Re-fetching...")

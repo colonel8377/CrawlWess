@@ -6,7 +6,7 @@ import time
 # Configuration
 # ==========================================
 # Get config from env or use defaults
-HOST = os.getenv("API_HOST", "")
+HOST = os.getenv("API_HOST", "https://crawlwess.up.railway.app/")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 USERNAME = "admin" # Username can be anything, only password is verified
 
@@ -54,12 +54,12 @@ if __name__ == "__main__":
 
     # 3. Trigger Daily Report
     # This will trigger the generation and sending of the daily report
-    call_endpoint("POST", "/debug/report", "Triggering Daily Report Job")
+    # call_endpoint("POST", "/debug/report", "Triggering Daily Report Job")
 
     # 4. Trigger Cleanup
     # This will trigger the cleanup of old files
-    call_endpoint("POST", "/debug/cleanup", "Triggering Cleanup Job")
+    # call_endpoint("POST", "/debug/cleanup", "Triggering Cleanup Job")
 
     # 5. Trigger Full Flow
     # This triggers Fetch followed by Report (note: execution might be parallel depending on scheduler)
-    call_endpoint("POST", "/debug/full-flow", "Triggering Full Flow (Fetch + Report)")
+    # call_endpoint("POST", "/debug/full-flow", "Triggering Full Flow (Fetch + Report)")
