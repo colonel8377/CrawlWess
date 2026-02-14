@@ -21,7 +21,8 @@ class AIService:
         Analyze article for score, summary and ad detection.
         Returns dict with keys: score, summary, is_ad
         """
-        truncated_content = content[:15000] 
+        # Truncate content if too long, but keep enough for context
+        truncated_content = content[:30000] 
         
         prompt = ANALYZE_ARTICLE_PROMPT.format(title=title, content=truncated_content)
 
@@ -29,9 +30,7 @@ class AIService:
             response = self.client.chat.completions.create(
                 model=settings.OPENAI_MODEL,
                 messages=[
-                    {"role": "system",
-                     "content": ANALYZE_ARTICLE_SYS_PROMPT}
-                    ,
+                    {"role": "system", "content": ANALYZE_ARTICLE_SYS_PROMPT},
                     {"role": "user", "content": prompt}
                 ],
                 response_format={ "type": "json_object" }
@@ -60,6 +59,9 @@ class AIService:
         articles_text = ""
         for i, art in enumerate(articles_data, 1):
             articles_text += f"{i}. 标题: {art['title']}\n   摘要: {art['summary']}\n\n"
+
+        # Truncate if too many articles
+        articles_text = articles_text[:50000]
 
         prompt = DAILY_INSIGHT_PROMPT.format(articles_text=articles_text)
 

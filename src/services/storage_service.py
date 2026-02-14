@@ -23,6 +23,12 @@ class StorageService:
     def _sanitize_filename(self, name: str) -> str:
         return re.sub(r'[\\/*?:"<>|]', "", name).strip().replace(" ", "_")
 
+    def save_md(self, subscription_name: str, date_str: str, title: str, content: str):
+        """
+        Alias for save_markdown(..., is_summary=False)
+        """
+        return self.save_markdown(subscription_name, date_str, title, content, is_summary=False)
+
     def save_markdown(self, subscription_name: str, date_str: str, title: str, content: str, is_summary: bool = False):
         """
         Save markdown content to file.
@@ -31,8 +37,13 @@ class StorageService:
         safe_sub_name = self._sanitize_filename(subscription_name)
         safe_title = self._sanitize_filename(title)
         
+        # Use safe_sub_name which comes from RSS feed title, and date
         folder_path = os.path.join(self.base_dir, safe_sub_name, date_str)
-        os.makedirs(folder_path, exist_ok=True)
+        try:
+            os.makedirs(folder_path, exist_ok=True)
+        except Exception as e:
+            logger.error(f"Failed to create directory {folder_path}: {e}")
+            return None
         
         filename = f"{safe_title}_summary.md" if is_summary else f"{safe_title}.md"
         file_path = os.path.join(folder_path, filename)

@@ -11,10 +11,16 @@ class ReportService:
         logger.info("Starting daily report generation...")
         with SessionLocal() as db:
             # Query unseen high-quality articles
+            # Criteria:
+            # 1. Not sent yet (is_sent == False)
+            # 2. Score >= threshold (e.g. 8)
+            # 3. Not an Ad
+            # 4. Must be processed (is_processed == True) - Ensure we only send analyzed ones
             articles = db.query(Article).filter(
                 Article.is_sent == False,
                 Article.score >= settings.MIN_SCORE,
-                Article.is_ad == False 
+                Article.is_ad == False,
+                Article.is_processed == True
             ).all()
 
             if not articles:
@@ -40,14 +46,16 @@ class ReportService:
             ]
             
             for article in articles:
+                # Add date to title for clarity if needed, or just keep as is
                 line = f"### [{article.title}]({article.link})  (评分: {article.score})"
                 message_lines.append(line)
-                message_lines.append(f"> {article.summary}")
-                message_lines.append("---")
+                message_lines.append(f"{article.summary}")
+                message_lines.append("") # Empty line
             
-            full_message = "\n\n".join(message_lines)
+            full_message = "\n".join(message_lines)
             
             # Send
+            # Notifier handles splitting if too long
             notifier.send_markdown(f"今日精选日报 {today_str}", full_message)
             
             # Update DB

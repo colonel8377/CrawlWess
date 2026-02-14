@@ -33,7 +33,8 @@ class Article(Base):
     __tablename__ = "articles"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    link = Column(String, unique=True, index=True, nullable=False)
+    entry_id = Column(String, unique=True, index=True, nullable=True) # RSS Entry ID
+    link = Column(String, index=True, nullable=False)
     title = Column(String, nullable=False)
     subscription_name = Column(String, index=True)
     publish_date = Column(DateTime, nullable=True) # RSS publish date
